@@ -25,12 +25,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -139,7 +138,9 @@ fun HomeScreen(navController: NavHostController? = null) {
                     Row(
                         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                     ) {
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = {
+                            navController?.navigate(ProfileDestination.route)
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
                                 contentDescription = "User Icon",
@@ -158,7 +159,7 @@ fun HomeScreen(navController: NavHostController? = null) {
                         ),
                     )
                 }
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(24.dp))
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -232,9 +233,7 @@ fun HomeScreen(navController: NavHostController? = null) {
                 itemsIndexed(medicineList) { index, medicine ->
                     MedicineCard(medicine = medicine,
                         onClick = {
-                            if (navController != null) {
-                                navController.navigate(MedicineDetailDestination.route)
-                            }
+                            navController?.navigate(MedicineDetailDestination.route)
                         }
                     )
                 }

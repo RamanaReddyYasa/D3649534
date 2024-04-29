@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Medicine Reminder</string>
+    <string name="ask_for_login">Ask for login</string>
+    <string name="name">Name</string>
+    <string name="save">Save</string>
+    <string name="user_details">User Details</string>
 </resources>

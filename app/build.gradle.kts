@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -69,6 +71,11 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation ("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.firebase:firebase-auth:22.3.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
