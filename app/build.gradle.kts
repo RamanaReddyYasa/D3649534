@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("kotlin-parcelize")
     id("com.google.gms.google-services")
-
+    id ("com.google.devtools.ksp")
+    id ("dagger.hilt.android.plugin")
 }
 
 android {
@@ -76,6 +78,17 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.firebase:firebase-auth:22.3.0")
+
+    // Room
+    implementation ("androidx.room:room-runtime:2.6.1")
+    ksp ("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+
+    //Dagger - Hilt
+    implementation("com.google.dagger:hilt-android:2.47")
+    ksp ("com.google.dagger:hilt-compiler:2.47")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,17 +1,19 @@
 package uk.ac.tees.mad.d3649534.screens
 
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,50 +33,51 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraEnhance
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DateRangePicker
-import androidx.compose.material3.DateRangePickerState
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -83,9 +85,17 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.d3649534.R
-import uk.ac.tees.mad.d3649534.components.CheckboxList
+import uk.ac.tees.mad.d3649534.data.domain.Medication
+import uk.ac.tees.mad.d3649534.screens.components.EndDatePickerDialog
+import uk.ac.tees.mad.d3649534.utils.Frequency
+import uk.ac.tees.mad.d3649534.utils.PermissionAlarmDialog
+import uk.ac.tees.mad.d3649534.utils.getRecurrenceList
+import uk.ac.tees.mad.d3649534.utils.toFormattedDateString
 import uk.ac.tees.mad.d3649534.viewmodels.AddMedicationViewModel
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 //enum class Week {
 //    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
@@ -95,9 +105,24 @@ import java.util.Calendar
     ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class
 )
 @Composable
-fun AddMedication(onCancel: () -> Unit) {
-    val addMedicationViewModel: AddMedicationViewModel = viewModel()
+fun AddMedication(
+    onCancel: () -> Unit,
+    addMedicationViewModel: AddMedicationViewModel = hiltViewModel()
+) {
+
     val uiState = addMedicationViewModel.addMedicationUiState.collectAsState().value
+    //setting start date
+    val today = Calendar.getInstance()
+//    today.set(Calendar.HOUR_OF_DAY, 0)
+//    today.set(Calendar.MINUTE, 0)
+//    today.set(Calendar.SECOND, 0)
+//    today.set(Calendar.MILLISECOND, 0)
+    val currentDayMillis = today.timeInMillis
+    addMedicationViewModel.updateUiState(uiState.copy(startDate = Date(currentDayMillis)))
+
+    var frequency by rememberSaveable {
+        mutableStateOf(Frequency.Daily.name)
+    }
 
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -109,7 +134,7 @@ fun AddMedication(onCancel: () -> Unit) {
     val minute = calendar[Calendar.MINUTE]
 
     // Value for storing time as a string
-    val selectedTimes = remember { mutableStateListOf<String>() }
+    var selectedTimes = remember { mutableStateListOf<String>() }
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
@@ -117,6 +142,10 @@ fun AddMedication(onCancel: () -> Unit) {
     )
     val cameraPermission = rememberPermissionState(android.Manifest.permission.CAMERA)
 
+    val alarmPermission = rememberPermissionState(android.Manifest.permission.SCHEDULE_EXACT_ALARM)
+    var showAlarmPermission by remember {
+        mutableStateOf(false)
+    }
     //Taking images from gallary
     var selectedImage by remember {
         mutableStateOf<Uri?>(null)
@@ -134,7 +163,10 @@ fun AddMedication(onCancel: () -> Unit) {
             bitmap?.let { addMedicationViewModel.handleImageCapture(it) }
         }
 
+
     Column(modifier = Modifier.padding(24.dp)) {
+        PermissionAlarmDialog(askAlarmPermission = alarmPermission.status.isGranted)
+
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false },
@@ -203,7 +235,7 @@ fun AddMedication(onCancel: () -> Unit) {
             label = { Text("Dosage") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(onDone = {
                 focusManager.clearFocus()
@@ -212,13 +244,8 @@ fun AddMedication(onCancel: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Frequency")
-        CheckboxList(weeksList) {
-            addMedicationViewModel.updateUiState(
-                uiState.copy(
-                    frequency = it
-                )
-            )
+        FrequencyDropdownMenu {
+            addMedicationViewModel.updateUiState(uiState.copy(frequency = it))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -226,9 +253,32 @@ fun AddMedication(onCancel: () -> Unit) {
         Text("Intake Times")
 
         Spacer(modifier = Modifier.height(8.dp))
-        val timePickerDialog = TimePickerDialog(context, { _, selHour: Int, selMinute: Int ->
-            selectedTimes.add("$selHour:$selMinute")
-        }, hour, minute, false)
+        val timePickerDialog = TimePickerDialog(
+            context,
+            TimePickerDialog.OnTimeSetListener { _, selHour: Int, selMinute: Int ->
+                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+                // Formatting the selected hour and minute into HH:mm format
+                val formattedTime = timeFormat.format(Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, selHour)
+                    set(Calendar.MINUTE, selMinute)
+                }.time)
+                selectedTimes.add(formattedTime)
+
+                val unformattedTime = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, selHour)
+                    set(Calendar.MINUTE, selMinute)
+                }.time
+                addMedicationViewModel.updateUiState(
+                    uiState.copy(
+                        medicationTimesList = uiState.medicationTimesList + unformattedTime
+                    )
+                )
+            },
+            hour,
+            minute,
+            false
+        )
 
         Row(
             modifier = Modifier
@@ -247,7 +297,9 @@ fun AddMedication(onCancel: () -> Unit) {
                 )
             } else {
                 LazyRow(
-                    modifier = Modifier.padding(5.dp),
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(selectedTimes) { time ->
@@ -265,7 +317,7 @@ fun AddMedication(onCancel: () -> Unit) {
                                     style = TextStyle(color = Color.White),
                                     modifier = Modifier.padding(8.dp)
                                 )
-                                IconButton(onClick = { /*TODO*/ }) {
+                                IconButton(onClick = { }) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Delete time",
@@ -287,6 +339,16 @@ fun AddMedication(onCancel: () -> Unit) {
         }
 
         // Add a spacer of 10dp
+        Spacer(modifier = Modifier.size(10.dp))
+        EndDateTextField(endDate = {
+            addMedicationViewModel.updateUiState(
+                uiState.copy(
+                    endDate = Date(
+                        it
+                    )
+                )
+            )
+        })
         Spacer(modifier = Modifier.size(10.dp))
 
         if (uiState.image == null) {
@@ -331,7 +393,19 @@ fun AddMedication(onCancel: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {}, modifier = Modifier
+            onClick = {
+                Log.d(
+                    "Perm",
+                    alarmPermission.permission + ", status: " + alarmPermission.status
+                )
+                if (validateFields(uiState, context, uiState.medicationTimesList)) {
+
+                    addMedicationViewModel.createMedication(context)
+                    selectedTimes.removeRange(0, selectedTimes.size - 1)
+                    onCancel()
+                }
+
+            }, modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
 
@@ -340,6 +414,171 @@ fun AddMedication(onCancel: () -> Unit) {
             Text("Submit")
         }
     }
+}
+
+fun validateFields(
+    uiState: Medication,
+    context: Context,
+    medicationTimes: List<Date>
+): Boolean {
+    // Check if the name field is not empty
+    if (uiState.name.isBlank()) {
+        Toast.makeText(context, "Name field cannot be empty", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
+    // Check if the dosage field is not empty
+    if (uiState.dosage.isBlank()) {
+        Toast.makeText(context, "Dosage field cannot be empty", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
+    // Check if the frequency field is not empty
+    if (uiState.frequency.isBlank()) {
+        Toast.makeText(context, "Frequency field cannot be empty", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
+    // Check if the medication times list is not empty
+    if (medicationTimes.isEmpty()) {
+        Toast.makeText(context, "At least one medication time must be set", Toast.LENGTH_SHORT)
+            .show()
+        return false
+    }
+
+    // Check if the end date is not null and is after the current date
+    if (uiState.endDate.before(Date())) {
+        Toast.makeText(context, "End date must be set to a future date", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
+    // If all checks pass, return true
+    return true
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FrequencyDropdownMenu(frequency: String? = null, recurrence: (String) -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = stringResource(id = R.string.frequency),
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        val options = getRecurrenceList().map { it.name }
+        var expanded by remember { mutableStateOf(false) }
+        var selectedOptionText by remember {
+            mutableStateOf(
+                options[0]
+            )
+        }
+        LaunchedEffect(frequency) {
+            if (frequency != null) {
+                selectedOptionText = options[options.indexOf(frequency)]
+            }
+        }
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                readOnly = true,
+                value = selectedOptionText,
+                onValueChange = {},
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                shape = RoundedCornerShape(16.dp)
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                options.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = { Text(selectionOption) },
+                        onClick = {
+                            selectedOptionText = selectionOption
+                            recurrence(selectionOption)
+                            expanded = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EndDateTextField(date: Date? = null, endDate: (Long) -> Unit) {
+    Text(
+        text = stringResource(id = R.string.end_date),
+        style = MaterialTheme.typography.bodyLarge
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+
+    var shouldDisplay by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed: Boolean by interactionSource.collectIsPressedAsState()
+    if (isPressed) {
+        shouldDisplay = true
+    }
+
+    val today = Calendar.getInstance()
+    today.set(Calendar.HOUR_OF_DAY, 0)
+    today.set(Calendar.MINUTE, 0)
+    today.set(Calendar.SECOND, 0)
+    today.set(Calendar.MILLISECOND, 0)
+    val currentDayMillis = today.timeInMillis
+
+    val initialDateMillis = date?.time ?: System.currentTimeMillis()
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialDateMillis,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= currentDayMillis
+            }
+        }
+    )
+
+    // Ensure selectedDate reflects the provided date or the current selection
+    var selectedDate by rememberSaveable { mutableStateOf(date?.toFormattedDateString() ?: "") }
+    LaunchedEffect(date) {
+        selectedDate = date?.toFormattedDateString() ?: ""
+    }
+    // Update selectedDate only when a date is confirmed in the picker
+    EndDatePickerDialog(
+        state = datePickerState,
+        shouldDisplay = shouldDisplay,
+        onConfirmClicked = { selectedDateInMillis ->
+            selectedDate = selectedDateInMillis.toFormattedDateString()
+            endDate(selectedDateInMillis)
+            shouldDisplay = false // Dismiss the dialog after selection
+        },
+        dismissRequest = {
+            shouldDisplay = false
+        }
+    )
+
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth(),
+        readOnly = true,
+        value = selectedDate,
+        onValueChange = {},
+        shape = RoundedCornerShape(20.dp),
+        trailingIcon = { Icons.Default.DateRange },
+        interactionSource = interactionSource
+    )
 }
 
 @Composable
@@ -393,14 +632,8 @@ fun PhotoPickerOption(
     }
 }
 
-fun byteArrayToBitmap(byteArray: ByteArray): ImageBitmap {
-    return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size).asImageBitmap()
-}
-
 @Preview(showBackground = true)
 @Composable
 fun AddMedPrev() {
-    AddMedication {
-
-    }
+    AddMedication(onCancel = { /*TODO*/ })
 }

@@ -1,5 +1,8 @@
 package uk.ac.tees.mad.d3649534.screens
 
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -55,11 +60,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.d3649534.R
+import uk.ac.tees.mad.d3649534.data.domain.Medication
 import uk.ac.tees.mad.d3649534.navigation.NavigationDestination
 import uk.ac.tees.mad.d3649534.ui.theme.green
+import uk.ac.tees.mad.d3649534.utils.filterByCurrentMonth
+import uk.ac.tees.mad.d3649534.utils.filterByCurrentYear
+import uk.ac.tees.mad.d3649534.viewmodels.HomeViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 
 object HomeScreenDestination : NavigationDestination {
     override val route = "home"
@@ -68,25 +82,37 @@ object HomeScreenDestination : NavigationDestination {
 
 val timeSpanList = listOf("This week", "This month", "This year")
 
-val weeksList = listOf("Mon", "Tue", "Wed", "Thus", "Fri", "Sat", "Sun")
+val weeksList = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController? = null) {
-
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val context = LocalContext.current
     var selectedItem by remember {
         mutableIntStateOf(0)
     }
 
-    var selectedWeek by remember {
-        mutableIntStateOf(0)
-    }
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
     )
     val scope = rememberCoroutineScope()
+
+    var filteredMedications by remember { mutableStateOf(listOf<Medication>()) }
+    val sdf = SimpleDateFormat("EE")
+    val sdfForDayIndex = SimpleDateFormat("u")
+    val d = Date()
+    val dayOfTheWeek: String = sdf.format(d)
+    var selectedWeek by remember {
+        mutableIntStateOf(sdfForDayIndex.format(d).toInt() - 1)
+    }
+    filteredMedications = homeViewModel.homeState.filter { med ->
+        val medicationDay = sdf.format(med.medicationTime)
+        medicationDay == dayOfTheWeek
+    }.distinctBy { it.name }
 
     Scaffold(
         floatingActionButton = {
@@ -159,6 +185,7 @@ fun HomeScreen(navController: NavHostController? = null) {
                         ),
                     )
                 }
+                Spacer(modifier = Modifier.height(18.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(24.dp))
                 LazyRow(
@@ -178,6 +205,17 @@ fun HomeScreen(navController: NavHostController? = null) {
                                 )
                                 .clickable {
                                     selectedItem = index
+                                    when (index) {
+                                        1 -> {
+                                            filteredMedications =
+                                                filterByCurrentMonth(homeViewModel.homeState)
+                                        }
+
+                                        2 -> {
+                                            filteredMedications =
+                                                filterByCurrentYear(homeViewModel.homeState)
+                                        }
+                                    }
                                 },
                         ) {
                             Text(
@@ -189,7 +227,7 @@ fun HomeScreen(navController: NavHostController? = null) {
                                     fontWeight = FontWeight.W500,
                                     letterSpacing = 0.5.sp
                                 ), modifier = Modifier.padding(
-                                    horizontal = 20.dp, vertical = 7.dp
+                                    horizontal = 20.dp, vertical = 15.dp
                                 )
                             )
                         }
@@ -218,6 +256,11 @@ fun HomeScreen(navController: NavHostController? = null) {
                             )
                             .clickable {
                                 selectedWeek = index
+                                filteredMedications = homeViewModel.homeState
+                                    .filter { med ->
+                                        sdf.format(med.medicationTime) == item
+                                    }
+                                    .distinctBy { it.name }
                             }
                     )
                 }
@@ -230,11 +273,13 @@ fun HomeScreen(navController: NavHostController? = null) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                itemsIndexed(medicineList) { index, medicine ->
-                    MedicineCard(medicine = medicine,
+                itemsIndexed(filteredMedications.toList()) { index, medicine ->
+                    MedicineCard(
+                        medicine = medicine,
                         onClick = {
-                            navController?.navigate(MedicineDetailDestination.route)
-                        }
+                            navController?.navigate(MedicineDetailDestination.route + "/" + medicine.medId)
+                        },
+                        context = context
                     )
                 }
             }
@@ -244,7 +289,7 @@ fun HomeScreen(navController: NavHostController? = null) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedicineCard(medicine: Medicine, onClick: () -> Unit) {
+fun MedicineCard(medicine: Medication, onClick: () -> Unit, context: Context) {
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -252,50 +297,61 @@ fun MedicineCard(medicine: Medicine, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.pill),
-                contentDescription = "Medicine icon",
-                modifier = Modifier.size(70.dp),
-                tint = green
-            )
-            Text(
-                text = medicine.name,
-                style = TextStyle(
-                    color = green,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.W700
+        Column(Modifier.fillMaxSize()) {
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (medicine.image == null) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.pill),
+                        contentDescription = "Medicine icon",
+                        modifier = Modifier.size(70.dp),
+                        tint = green
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(70.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                    ) {
+                        AsyncImage(
+                            model = ImageRequest
+                                .Builder(context = context)
+                                .data(medicine.image)
+                                .crossfade(true).build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = medicine.name,
+                    style = TextStyle(
+                        color = green,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.W700
+                    )
                 )
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${medicine.dose} times today",
-                style = TextStyle(color = green, fontSize = 14.sp)
-            )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = medicine.dosage,
+                    style = TextStyle(color = green, fontSize = 14.sp)
+                )
+            }
         }
     }
 }
 
-val medicineList = listOf(
-    Medicine("Atorvastatin", 3),
-    Medicine("Codeine", 3),
-    Medicine("Lexapro", 3),
-    Medicine("Cymbaite", 3),
-    Medicine("Paracetamol", 3),
-    Medicine("Dolo", 3),
-    Medicine("Seredon", 3),
-    Medicine("Gebapantin", 3),
-)
 
-data class Medicine(
-    val name: String,
-    val dose: Int,
-)
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPrev() {

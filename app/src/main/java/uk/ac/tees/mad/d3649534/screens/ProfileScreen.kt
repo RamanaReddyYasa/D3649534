@@ -3,6 +3,7 @@ package uk.ac.tees.mad.d3649534.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,13 +19,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ContactSupport
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -43,11 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import uk.ac.tees.mad.d3649534.R
-import uk.ac.tees.mad.d3649534.components.AlertDialog
-import uk.ac.tees.mad.d3649534.domain.UserData
+import uk.ac.tees.mad.d3649534.data.domain.UserData
 import uk.ac.tees.mad.d3649534.navigation.NavigationDestination
+import uk.ac.tees.mad.d3649534.screens.components.AlertDialog
 import uk.ac.tees.mad.d3649534.ui.theme.green
 
 object ProfileDestination : NavigationDestination {
@@ -57,10 +57,11 @@ object ProfileDestination : NavigationDestination {
 
 @Composable
 fun ProfileScreen(
-    navController: NavHostController? = null,
     currentUser: UserData?,
     onSignOut: () -> Unit,
-    onSignIn: () -> Unit
+    onSignIn: () -> Unit,
+    onNavigateUp: () -> Unit,
+    onNavigationHistory: () -> Unit
 ) {
     var signOutConfirm by remember {
         mutableStateOf(false)
@@ -78,6 +79,16 @@ fun ProfileScreen(
                 .fillMaxWidth()
                 .background(green)
         ) {
+            Spacer(modifier = Modifier.height(4.dp))
+            IconButton(
+                onClick = onNavigateUp
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = "Go back",
+                    tint = Color.White
+                )
+            }
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -129,15 +140,10 @@ fun ProfileScreen(
         }
         Column(modifier = Modifier.padding(24.dp)) {
             if (currentUser != null) {
-//                AccountListCard(
-//                    icon = Icons.Filled.AccountCircle,
-//                    text = "Profile",
-//                    onClick = {}
-//                )
                 AccountListCard(
                     icon = Icons.Filled.History,
                     text = "Reminder History",
-                    onClick = {}
+                    onClick = onNavigationHistory
                 )
             } else {
                 Column(
@@ -214,6 +220,7 @@ fun AccountListCard(icon: ImageVector, text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
+            .clickable { onClick() }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
             Icon(imageVector = icon, contentDescription = null)
@@ -261,7 +268,10 @@ fun SignButton(
 @Preview
 @Composable
 private fun ProfileView() {
-    ProfileScreen(currentUser = null, onSignOut = { /*TODO*/ }) {
-
-    }
+    ProfileScreen(
+        currentUser = null,
+        onSignOut = { /*TODO*/ },
+        onNavigateUp = {},
+        onSignIn = {},
+        onNavigationHistory = {})
 }

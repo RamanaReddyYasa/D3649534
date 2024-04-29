@@ -4,4 +4,10 @@
     <string name="name">Name</string>
     <string name="save">Save</string>
     <string name="user_details">User Details</string>
+    <string name="end_date">End date</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit_medication">Edit Medication</string>
+    <string name="frequency">Frequency</string>
+    <string name="medication_history">Medication History</string>
 </resources>

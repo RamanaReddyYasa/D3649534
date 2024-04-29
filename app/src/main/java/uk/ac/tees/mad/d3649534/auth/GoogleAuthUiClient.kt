@@ -1,6 +1,5 @@
 package uk.ac.tees.mad.d3649534.auth
 
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -9,14 +8,13 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.tasks.await
-import uk.ac.tees.mad.d3649534.domain.SignInResult
-import uk.ac.tees.mad.d3649534.domain.UserData
+import uk.ac.tees.mad.d3649534.data.domain.SignInResult
+import uk.ac.tees.mad.d3649534.data.domain.UserData
 import uk.ac.tees.mad.d3649534.utils.ServerClient
 import java.util.concurrent.CancellationException
 
 
 class GoogleAuthUiClient(
-    private val context: Context,
     private val oneTapClient: SignInClient
 ) {
     private val auth = Firebase.auth
@@ -34,7 +32,7 @@ class GoogleAuthUiClient(
         return result?.pendingIntent?.intentSender
     }
 
-    suspend fun signInWithIntent(intent: Intent): SignInResult{
+    suspend fun signInWithIntent(intent: Intent): SignInResult {
         val credential = oneTapClient.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
         val googleCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
