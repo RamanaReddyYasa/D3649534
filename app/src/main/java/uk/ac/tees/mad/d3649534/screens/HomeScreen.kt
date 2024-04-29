@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -82,7 +84,9 @@ fun HomeScreen(navController: NavHostController? = null) {
     }
 
     var showBottomSheet by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState()
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -100,18 +104,20 @@ fun HomeScreen(navController: NavHostController? = null) {
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showBottomSheet = false },
-                sheetState = bottomSheetState
+                sheetState = bottomSheetState,
+                windowInsets = WindowInsets.ime
             ) {
                 // Sheet content
-                Button(onClick = {
-                    scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                        if (!bottomSheetState.isVisible) {
-                            showBottomSheet = false
+
+                AddMedication(
+                    onCancel = {
+                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
+                            if (!bottomSheetState.isVisible) {
+                                showBottomSheet = false
+                            }
                         }
                     }
-                }) {
-                    Text("Hide bottom sheet")
-                }
+                )
             }
         }
         Column(
@@ -224,7 +230,13 @@ fun HomeScreen(navController: NavHostController? = null) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 itemsIndexed(medicineList) { index, medicine ->
-                    MedicineCard(medicine = medicine)
+                    MedicineCard(medicine = medicine,
+                        onClick = {
+                            if (navController != null) {
+                                navController.navigate(MedicineDetailDestination.route)
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -233,9 +245,9 @@ fun HomeScreen(navController: NavHostController? = null) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedicineCard(medicine: Medicine) {
+fun MedicineCard(medicine: Medicine, onClick: () -> Unit) {
     Card(
-        onClick = { /*TODO*/ },
+        onClick = onClick,
         modifier = Modifier
             .aspectRatio(1f),
         colors = CardDefaults.cardColors(containerColor = Color.White),

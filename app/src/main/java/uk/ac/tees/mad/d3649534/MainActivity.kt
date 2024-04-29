@@ -8,10 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import uk.ac.tees.mad.d3649534.navigation.MedicineReminderNavigation
+import uk.ac.tees.mad.d3649534.screens.MedicineDetail
 import uk.ac.tees.mad.d3649534.ui.theme.MedicineReminderTheme
 
 class MainActivity : ComponentActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
