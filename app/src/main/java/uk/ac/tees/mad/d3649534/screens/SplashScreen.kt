@@ -40,6 +40,7 @@ object SplashScreenDestination : NavigationDestination {
 
 @Composable
 fun SplashScreen(navController: NavHostController) {
+
     val alpha = remember {
         Animatable(0f)
     }
