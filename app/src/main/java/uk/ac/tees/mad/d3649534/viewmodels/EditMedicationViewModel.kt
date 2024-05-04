@@ -59,7 +59,6 @@ class EditMedicationViewModel @Inject constructor(
     suspend fun updateMedication(context: Context) {
         repository.deleteMedication(medId)
 
-
         val interval = when (_uiState.value.frequency) {
             "Daily" -> 1
             "Weekly" -> 7

@@ -119,7 +119,7 @@ fun HomeScreen(navController: NavHostController? = null) {
             FloatingActionButton(
                 onClick = { showBottomSheet = true },
                 shape = RoundedCornerShape(50.dp),
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = green
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add new medicine")
             }

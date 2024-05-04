@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraEnhance
@@ -164,7 +166,9 @@ fun AddMedication(
         }
 
 
-    Column(modifier = Modifier.padding(24.dp)) {
+    Column(modifier = Modifier
+        .padding(24.dp)
+        .verticalScroll(rememberScrollState())) {
         PermissionAlarmDialog(askAlarmPermission = alarmPermission.status.isGranted)
 
         if (showBottomSheet) {

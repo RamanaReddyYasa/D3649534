@@ -28,7 +28,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -339,7 +338,11 @@ fun EditMedication(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {}, modifier = Modifier
+            onClick = {
+                scope.launch {
+                    editMedicationViewModel.updateMedication(context)
+                }
+            }, modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
 
