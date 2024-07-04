@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -187,52 +188,6 @@ fun HomeScreen(navController: NavHostController? = null) {
                 }
                 Spacer(modifier = Modifier.height(18.dp))
                 HorizontalDivider()
-                Spacer(modifier = Modifier.height(24.dp))
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-                    itemsIndexed(timeSpanList) { index, item ->
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    color = if (index == selectedItem) {
-                                        Color.White
-                                    } else Color.Transparent
-                                )
-                                .clickable {
-                                    selectedItem = index
-                                    when (index) {
-                                        1 -> {
-                                            filteredMedications =
-                                                filterByCurrentMonth(homeViewModel.homeState)
-                                        }
-
-                                        2 -> {
-                                            filteredMedications =
-                                                filterByCurrentYear(homeViewModel.homeState)
-                                        }
-                                    }
-                                },
-                        ) {
-                            Text(
-                                text = item, style = TextStyle(
-                                    color = if (index == selectedItem) {
-                                        green
-                                    } else Color.White,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.W500,
-                                    letterSpacing = 0.5.sp
-                                ), modifier = Modifier.padding(
-                                    horizontal = 20.dp, vertical = 15.dp
-                                )
-                            )
-                        }
-                    }
-                }
             }
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(15.dp),
@@ -310,7 +265,9 @@ fun MedicineCard(medicine: Medication, onClick: () -> Unit, context: Context) {
                     Icon(
                         painter = painterResource(id = R.drawable.pill),
                         contentDescription = "Medicine icon",
-                        modifier = Modifier.size(70.dp),
+                        modifier = Modifier
+                            .size(70.dp)
+                            .rotate(-90f),
                         tint = green
                     )
                 } else {
