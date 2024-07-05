@@ -21,7 +21,7 @@ class NotificationManagerService(
             context,
             medication.id.toInt(),
             intent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+            PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmService = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

@@ -170,32 +170,32 @@ fun MedicationCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(70.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            ) {
-                if (medicine.image == null) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.pill),
-                        contentDescription = "Medicine icon",
-                        modifier = Modifier.size(70.dp),
-                        tint = green
-                    )
-                } else {
-
-                    AsyncImage(
-                        model = ImageRequest
-                            .Builder(context = context)
-                            .data(medicine.image)
-                            .crossfade(true).build(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
+//            Box(
+//                modifier = Modifier
+//                    .size(70.dp)
+//                    .clip(RoundedCornerShape(16.dp))
+//            ) {
+//                if (medicine.image == null) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.pill),
+//                        contentDescription = "Medicine icon",
+//                        modifier = Modifier.size(70.dp),
+//                        tint = green
+//                    )
+//                } else {
+//
+//                    AsyncImage(
+//                        model = ImageRequest
+//                            .Builder(context = context)
+//                            .data(medicine.image)
+//                            .crossfade(true).build(),
+//                        contentDescription = null,
+//                        modifier = Modifier
+//                            .fillMaxWidth(),
+//                        contentScale = ContentScale.Crop
+//                    )
+//                }
+//            }
             Spacer(modifier = Modifier.width(12.dp))
             Column(
                 modifier = Modifier

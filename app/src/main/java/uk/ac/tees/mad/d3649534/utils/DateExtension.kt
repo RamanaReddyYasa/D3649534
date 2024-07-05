@@ -19,18 +19,3 @@ fun Date.toFormattedTimeString(): String {
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     return timeFormat.format(this)
 }
-
-fun Long.toFormattedTimeString(): String {
-    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    return timeFormat.format(this)
-}
-
-fun Date.hasPassed(): Boolean {
-    val calendar = Calendar.getInstance()
-    calendar.add(Calendar.SECOND, -1)
-    val oneSecondAgo = calendar.time
-    return time < oneSecondAgo.time
-}
-
-
-

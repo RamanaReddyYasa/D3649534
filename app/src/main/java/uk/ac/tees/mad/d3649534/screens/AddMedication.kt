@@ -90,7 +90,6 @@ import uk.ac.tees.mad.d3649534.R
 import uk.ac.tees.mad.d3649534.data.domain.Medication
 import uk.ac.tees.mad.d3649534.screens.components.EndDatePickerDialog
 import uk.ac.tees.mad.d3649534.utils.Frequency
-import uk.ac.tees.mad.d3649534.utils.PermissionAlarmDialog
 import uk.ac.tees.mad.d3649534.utils.getRecurrenceList
 import uk.ac.tees.mad.d3649534.utils.toFormattedDateString
 import uk.ac.tees.mad.d3649534.viewmodels.AddMedicationViewModel
@@ -169,7 +168,6 @@ fun AddMedication(
     Column(modifier = Modifier
         .padding(24.dp)
         .verticalScroll(rememberScrollState())) {
-        PermissionAlarmDialog(askAlarmPermission = alarmPermission.status.isGranted)
 
         if (showBottomSheet) {
             ModalBottomSheet(

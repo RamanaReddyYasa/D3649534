@@ -166,13 +166,8 @@ fun ProfileScreen(
             HorizontalDivider()
         }
         Column(modifier = Modifier.padding(24.dp)) {
-            if (currentUser != null) {
-                AccountListCard(
-                    icon = Icons.Filled.History,
-                    text = "Reminder History",
-                    onClick = onNavigationHistory
-                )
-            } else {
+            if (currentUser == null) {
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -201,6 +196,11 @@ fun ProfileScreen(
                     }
                 }
             }
+            AccountListCard(
+                icon = Icons.Filled.History,
+                text = "Reminder History",
+                onClick = onNavigationHistory
+            )
             AccountListCard(icon = Icons.Filled.Settings, text = "Preferences", onClick = {})
             AccountListCard(
                 icon = Icons.AutoMirrored.Filled.ContactSupport,

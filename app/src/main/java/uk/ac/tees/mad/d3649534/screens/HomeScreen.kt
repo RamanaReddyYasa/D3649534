@@ -35,7 +35,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -70,8 +69,6 @@ import uk.ac.tees.mad.d3649534.R
 import uk.ac.tees.mad.d3649534.data.domain.Medication
 import uk.ac.tees.mad.d3649534.navigation.NavigationDestination
 import uk.ac.tees.mad.d3649534.ui.theme.green
-import uk.ac.tees.mad.d3649534.utils.filterByCurrentMonth
-import uk.ac.tees.mad.d3649534.utils.filterByCurrentYear
 import uk.ac.tees.mad.d3649534.viewmodels.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -80,8 +77,6 @@ object HomeScreenDestination : NavigationDestination {
     override val route = "home"
     override val titleRes: Int = R.string.app_name
 }
-
-val timeSpanList = listOf("This week", "This month", "This year")
 
 val weeksList = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
