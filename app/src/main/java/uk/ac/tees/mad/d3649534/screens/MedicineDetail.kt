@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -185,9 +186,13 @@ fun MedicineDetail(
         }
         Spacer(modifier = Modifier.height(40.dp))
 
-        Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(
-                text = uiState.value.medicationTimesList.size.toString() + " times",
+                text = "Dose times",
                 style = TextStyle(
                     color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 24.sp
                 )
@@ -211,9 +216,13 @@ fun MedicineDetail(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(
                 text = "Program", style = TextStyle(
                     color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 24.sp
@@ -228,9 +237,13 @@ fun MedicineDetail(
                 )
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(
                 text = "Start Date", style = TextStyle(
                     color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 24.sp
@@ -247,9 +260,13 @@ fun MedicineDetail(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(26.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        Column {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(
                 text = "End Date", style = TextStyle(
                     color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 24.sp
@@ -304,10 +321,4 @@ fun MedicineText(
             )
         )
     }
-}
-
-@Preview
-@Composable
-private fun MedDetail() {
-    MedicineDetail(onNavigateUp = {}, onChangeSchedule = {})
 }

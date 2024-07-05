@@ -3,11 +3,14 @@ package uk.ac.tees.mad.d3649534.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -80,26 +83,33 @@ fun ProfileScreen(
                 .background(green)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
-            IconButton(
-                onClick = onNavigateUp
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBackIosNew,
-                    contentDescription = "Go back",
-                    tint = Color.White
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = onNavigateUp
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBackIosNew,
+                        contentDescription = "Go back",
+                        tint = Color.White
+                    )
+                }
+                Row(
+                    Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Profile",
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                }
             }
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Profile",
-                    style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                )
-            }
+
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,34 +117,51 @@ fun ProfileScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                    modifier = Modifier
+                        .height(IntrinsicSize.Max)
+                        .border(
+                            width = 1.dp,
+                            color = Color.White,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
 
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = "User Icon",
                         modifier = Modifier.size(100.dp),
+                        tint = Color.White
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxHeight()
+                    ) {
+                        Text(
+                            text = if (currentUser == null) "Guest" else "${currentUser.username}",
+                            style = TextStyle(
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                letterSpacing = 0.5.sp,
+                                fontWeight = FontWeight.W500
+                            ),
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = if (currentUser == null) "guest@gmail.com" else "${currentUser.email}",
+                            style = TextStyle(
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                letterSpacing = 0.5.sp,
+                            ),
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (currentUser == null) "Guest" else "${currentUser.username}",
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        letterSpacing = 0.5.sp,
-                        fontWeight = FontWeight.W500
-                    ),
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = if (currentUser == null) "guest@gmail.com" else "${currentUser.email}",
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        letterSpacing = 0.5.sp,
-                    ),
-                )
+
             }
             HorizontalDivider()
         }
