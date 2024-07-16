@@ -196,11 +196,13 @@ fun ProfileScreen(
                     }
                 }
             }
-            AccountListCard(
-                icon = Icons.Filled.History,
-                text = "Reminder History",
-                onClick = onNavigationHistory
-            )
+            if (currentUser != null) {
+                AccountListCard(
+                    icon = Icons.Filled.History,
+                    text = "Reminder History",
+                    onClick = onNavigationHistory
+                )
+            }
             AccountListCard(icon = Icons.Filled.Settings, text = "Preferences", onClick = {})
             AccountListCard(
                 icon = Icons.AutoMirrored.Filled.ContactSupport,

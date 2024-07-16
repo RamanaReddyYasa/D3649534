@@ -13,6 +13,8 @@ import uk.ac.tees.mad.d3649534.data.repository.MedicationRepository
 import uk.ac.tees.mad.d3649534.data.repository.MedicationRepositoryImpl
 import javax.inject.Singleton
 
+//Dagger _ Hilt
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
